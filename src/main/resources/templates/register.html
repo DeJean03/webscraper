@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+<!--  <link rel="stylesheet" href="/css/style.css">-->
+<!--  <style>-->
+<!--    .error-message {-->
+<!--      color: red;-->
+<!--      font-size: 12px;-->
+<!--      margin-top: 5px;-->
+<!--    }-->
+<!--    form {-->
+<!--      max-width: 500px;-->
+<!--      margin: 0 auto;-->
+<!--      padding: 1em;-->
+<!--      border: 1px solid #ccc;-->
+<!--      border-radius: 5px;-->
+<!--      background-color: #fdfdfd;-->
+<!--    }-->
+<!--    h1 {-->
+<!--      text-align: center;-->
+<!--    }-->
+<!--    label {-->
+<!--      display: block;-->
+<!--      font-weight: bold;-->
+<!--      margin-bottom: 5px;-->
+<!--    }-->
+<!--    input, select, button {-->
+<!--      width: 100%;-->
+<!--      margin-bottom: 15px;-->
+<!--      padding: 10px;-->
+<!--      border-radius: 5px;-->
+<!--      border: 1px solid #ccc;-->
+<!--    }-->
+<!--    button {-->
+<!--      background-color: #007bec;-->
+<!--      color: white;-->
+<!--      border: none;-->
+<!--      cursor: pointer;-->
+<!--    }-->
+<!--    button:hover {-->
+<!--      background-color: #005bb5;-->
+<!--    }-->
+<!--    .redirect {-->
+<!--      text-align: center;-->
+<!--      margin-top: 10px;-->
+<!--    }-->
+<!--  </style>-->
+</head>
+<body>
+<h1>Sign Up</h1>
+
+<!-- Error Message -->
+<div th:if="${error}" class="error-message">
+  <p th:text="${error}"></p>
+</div>
+
+<!-- Registration Form -->
+<form th:action="@{/register}" th:object="${user}" method="post">
+  <!-- Username -->
+  <div>
+    <label for="username">Username:</label>
+    <input type="text" id="username" th:field="*{username}" placeholder="Enter your username" required>
+    <p th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error-message"></p>
+  </div>
+
+  <!-- Password -->
+  <div>
+    <label for="password">Password:</label>
+    <input type="password" id="password" th:field="*{password}" placeholder="Enter your password" required>
+    <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error-message"></p>
+  </div>
+
+  <!-- Email -->
+  <div>
+    <label for="email">Email:</label>
+    <input type="email" id="email" th:field="*{email}" placeholder="Enter your email" required>
+    <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error-message"></p>
+  </div>
+
+  <!-- Referral Dropdown -->
+  <div>
+    <label for="refer">How did you hear about us?</label>
+    <select id="refer" name="refer" th:field="*{refer}" required>
+      <option value="" disabled selected>Select</option>
+      <option value="facebook">Facebook</option>
+      <option value="google">Google</option>
+      <option value="linkedin">LinkedIn</option>
+    </select>
+    <p th:if="${#fields.hasErrors('refer')}" th:errors="*{refer}" class="error-message"></p>
+  </div>
+
+  <!-- Contact Method -->
+  <fieldset>
+    <legend>Preferred Contact Method:</legend>
+    <label>
+      <input type="radio" name="contact" th:field="*{contact}" value="email" required> Email
+    </label>
+    <label>
+      <input type="radio" name="contact" th:field="*{contact}" value="phone"> Phone
+    </label>
+    <p th:if="${#fields.hasErrors('contact')}" th:errors="*{contact}" class="error-message"></p>
+  </fieldset>
+
+  <!-- Terms -->
+<!--  <div>-->
+<!--    <label>-->
+<!--      <input type="checkbox" th:field="*{terms}" required> I agree to the terms and conditions-->
+<!--    </label>-->
+<!--    <p th:if="${#fields.hasErrors('terms')}" th:errors="*{terms}" class="error-message"></p>-->
+<!--  </div>-->
+
+  <!-- Submit Button -->
+  <button type="submit">Sign Up</button>
+</form>
+
+<!-- Redirect to Login -->
+<div class="redirect">
+  <p>Already have an account? <a th:href="@{/login}">Log in</a></p>
+</div>
+</body>
+</html>

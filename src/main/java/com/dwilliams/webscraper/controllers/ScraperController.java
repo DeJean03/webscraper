@@ -10,194 +10,121 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/scraper")
-@CrossOrigin(
-        origins = "http://localhost:63342",
-        allowCredentials = "true",
-        allowedHeaders = "*",
-        methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS}
-)
 public class ScraperController {
 
-    private static final Logger logger = LoggerFactory.getLogger(ScraperController.class);
+    private final ScraperService scraperService;
+    private final ScrapedDataService scrapedDataService;
 
     @Autowired
-    private ScraperService scraperService;
+    public ScraperController(ScraperService scraperService, ScrapedDataService scrapedDataService) {
+        this.scraperService = scraperService;
+        this.scrapedDataService = scrapedDataService;
+    }
 
-    @Autowired
-    private ScrapedDataService scrapedDataService;
+    // GET: Return the main scraping page (view)
+    @GetMapping(value = "/start")
+    public String getScrapePage(Model model) {
+        model.addAttribute("message", "Start your scraping task here");
+        return "StartScraping"; // View name
+    }
 
-    // ===========================================
-    // 1. Web Scraping Methods
-    // ===========================================
-
-    /**
-     * Starts web scraping for a given URL.
-     *
-     * @param url The URL to scrape.
-     * @return The task ID for scraping.
-     */
-    @PostMapping("/start")
-    public ResponseEntity<String> startScraping(@RequestParam String url) {
+    // POST: Start a scraping task
+    @PostMapping(value = "/start")
+    public String startScraping(@RequestParam String url, Model model) {
         if (!isValidUrl(url)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Invalid URL format.");
+            model.addAttribute("error", "Invalid URL format.");
+            return "redirect: /StartScraping"; // Return back to scraping page with error
         }
 
         try {
             String taskId = scraperService.startScraping(url);
-            logger.info("Scraping started for URL: {} with Task ID: {}", url, taskId);
-            return ResponseEntity.ok(taskId);
+            model.addAttribute("success", "Scraping task started successfully! Task ID: " + taskId);
+            return "redirect:/scraping_results?taskId=" + taskId; // Redirect to the results page
         } catch (Exception e) {
-            logger.error("[startScraping] Error for URL: {}", url, e);
-            throw e; // Delegates to GlobalExceptionHandler
+            model.addAttribute("error", "Failed to start scraping task.");
+            return "StartScraping";
         }
     }
 
-    /**
-     * Retrieves scraping results for a given Task ID.
-     *
-     * @param taskId The Task ID to fetch results for.
-     * @return A list of scraping results or an error message if not found.
-     */
-    @GetMapping("/results")
-    public ResponseEntity<?> getScrapingResults(@RequestParam String taskId) {
+    // GET: Fetch scraping results for a specific task and return view
+    @GetMapping("/scraping_results")
+    public String getScrapingResults(@RequestParam String taskId, Model model) {
         try {
             List<ScrapedData> results = scraperService.getResultsByTaskId(taskId);
 
             if (results.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "No scraping results found for the provided Task ID."));
+                model.addAttribute("message", "No results found for the given Task ID.");
+            } else {
+                model.addAttribute("results", results);
             }
-
-            return ResponseEntity.ok(results);
+            return "scraping_results"; // View name
         } catch (Exception e) {
-            logger.error("Error fetching results for Task ID: {}", taskId, e);
-            throw e; // Delegates to GlobalExceptionHandler
+            model.addAttribute("error", "An error occurred while fetching results.");
+            return "scraping_results";
         }
     }
 
-    /**
-     * Redirects to the /scraper/start endpoint while preserving the HTTP method.
-     *
-     * @param url Optional URL to be passed during redirection.
-     * @return A 307 Temporary Redirect response.
-     */
-    @GetMapping("/start-scraping")
-    public ResponseEntity<Void> redirectToStartScraping(@RequestParam(required = false) String url) {
-        String location = "/scraper/start";
-
-        // Append the URL parameter if provided
-        if (url != null && !url.isBlank()) {
-            location += "?url=" + url;
-        }
-
-        return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT)
-                .header("Location", location)
-                .build();
-    }
-
-    // ===========================================
-    // 2. CRUD Operations for Scraped Data
-    // ===========================================
-
-    /**
-     * Retrieves all scraped data.
-     *
-     * @return A list of all scraped data or no content if empty.
-     */
+    // GET: Fetch all scraped data and return view
     @GetMapping("/data")
-    public ResponseEntity<List<ScrapedData>> getAllScrapedData() {
+    public String getAllScrapedData(Model model) {
         List<ScrapedData> scrapedData = scrapedDataService.getAllScrapedData();
 
         if (scrapedData.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            model.addAttribute("message", "No scraped data available.");
+        } else {
+            model.addAttribute("scrapedData", scrapedData);
         }
-        return ResponseEntity.ok(scrapedData);
+
+        return "scraped-data-list"; // View name for displaying all scraped data records
     }
 
-    /**
-     * Creates a new scraped data entry.
-     *
-     * @param scrapedData The scraped data to create.
-     * @return The created scraped data or an error response.
-     */
+    // POST: Add new scraped data
     @PostMapping("/data")
-    public ResponseEntity<ScrapedData> createScrapedData(@Valid @RequestBody ScrapedData scrapedData) {
+    public String createScrapedData(@Valid @RequestBody ScrapedData scrapedData, Model model) {
         try {
             ScrapedData savedData = scrapedDataService.createScrapedData(scrapedData.getTitle(), scrapedData.getLink());
-            logger.info("Scraped data created successfully: {}", savedData);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedData);
+            model.addAttribute("success", "Scraped data saved successfully!");
+            return "redirect:/scraper/data"; // Redirect to all data view
         } catch (Exception e) {
-            logger.error("Error creating scraped data", e);
-            throw e; // Delegates to GlobalExceptionHandler
+            model.addAttribute("error", "An error occurred while saving scraped data.");
+            return "scraped-data-form"; // Return to a form page (create data form)
         }
     }
 
-    /**
-     * Adds scraped data by specifying the title and link.
-     *
-     * @param title The title of the scraped data.
-     * @param link  The link of the scraped data.
-     * @return A success response or an error response for invalid input.
-     */
+    // POST: Helper endpoint to validate and save data
     @PostMapping("/data/add")
-    public ResponseEntity<String> saveData(
-            @RequestParam @NotBlank String title,
-            @RequestParam @NotBlank String link
-    ) {
-        if (!isValidUrl(link)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Invalid URL format for the link.");
-        }
-
-        if (title.isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Invalid title. Title cannot be null or empty.");
+    public String saveData(@RequestParam String title, @RequestParam String link, Model model) {
+        if (!isValidUrl(link) || title.isBlank()) {
+            model.addAttribute("error", "Title and link must be valid and non-empty.");
+            return "scraped-data-form"; // Return to the data form with error
         }
 
         try {
             scrapedDataService.saveScrapedData(title, link);
-            logger.info("Scraped data added successfully: Title={}, Link={}", title, link);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Data saved successfully!");
-        } catch (IllegalArgumentException e) {
-            logger.error("Error adding scraped data: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
+            model.addAttribute("success", "Data saved successfully!");
+            return "redirect:/scraper/data"; // Redirect to the scraped data list view
         } catch (Exception e) {
-            logger.error("Error occurred while saving data", e);
-            throw e; // Delegates to GlobalExceptionHandler
+            model.addAttribute("error", "Failed to save data.");
+            return "scraped-data-form"; // Return to the form page
         }
     }
 
-    // ===========================================
-    // 3. Utility Methods
-    // ===========================================
-
-    /**
-     * Validates if a given URL is in the correct format.
-     *
-     * @param url The URL to validate.
-     * @return True if valid, false otherwise.
-     */
+    // Utility: Validate URL format
     private boolean isValidUrl(String url) {
-        if (url == null || url.isBlank()) {
-            return false;
-        }
-
         try {
-            new URL(url);
+            new URL(url); // Check if valid
             return true;
         } catch (MalformedURLException e) {
-            logger.warn("Invalid URL format: {}", url, e);
             return false;
         }
     }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Start Scraping</title>
     <link rel="stylesheet" href="/css/style.css">
@@ -10,28 +10,32 @@
 <p>Enter the link you want to scrape:</p>
 
 <div class="container">
-    <form id="scraping-form" method="POST" action="/scraper/start">
-    <label for="url">URL to Scrape:</label>
+    <form id="scraping-form">
+        <label for="url">URL to Scrape:</label>
         <input type="url" id="url" name="url" placeholder="https://example.com" required><br>
-
         <button type="submit">Start Scraping</button>
     </form>
     <div id="response-message" style="margin-top: 16px;"></div>
 </div>
 
 <nav>
-    <div class="dropdown">
-        <button class="dropbtn">Menu</button>
-        <div class="dropdown-content">
-            <a href="dashboard.html">Dashboard</a>
-            <a href="/logout">Logout</a>
-        </div>
+    <div class="navbar">
+        <div class="navbar-logo">Webscrapper</div>
+        <ul>
+            <li><a th:href="@{/templates/register.html}">Sign Up</a></li>
+            <li><a th:href="@{/login}">Login</a></li>
+            <li><a th:href="@{/StartScraping.html}">Start Scraping</a></li>
+            <li><a th:href="@{/scraping_results.html}">scraping results</a></li>
+        </ul>
     </div>
 </nav>
+
 
 <script>
     document.getElementById("scraping-form").addEventListener("submit", async function(event) {
         event.preventDefault();
+        console.log("JavaScript submit interception working!");
+
 
         const url = document.getElementById("url").value;
         const responseMessage = document.getElementById("response-message");

@@ -59,49 +59,18 @@ public class UserService {
 
     @Transactional
     public void registerUser(User user) {
-        if (user.getUsername() == null || user.getUsername().isBlank()) {
-            throw new IllegalArgumentException("Username cannot be null or blank.");
-        }
-        if (user.getPassword() == null || user.getPassword().isBlank()) {
-            throw new IllegalArgumentException("Password cannot be null or blank.");
-        }
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new IllegalArgumentException("Email cannot be null or blank.");
-        }
 
-        // Check if the username is unique
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Username already exists.");
-        }
-
-        // Check if the email is unique
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already exists.");
-        }
-
-        // Encode the password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-
-        // Save the user to the database
         userRepository.save(user);
     }
 
-    /**
-     * Retrieve all users.
-     *
-     * @return A list of all users.
-     */
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    /**
-     * Retrieve a user by ID.
-     *
-     * @param userId The ID of the user.
-     * @return An Optional containing the user object if found, or empty if not found.
-     */
+
     public Optional<User> getUserById(Long userId) {
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("Invalid user ID.");
@@ -109,12 +78,7 @@ public class UserService {
         return userRepository.findById(userId);
     }
 
-    /**
-     * Delete a user by ID.
-     *
-     * @param userId The ID of the user to delete.
-     * @throws IllegalArgumentException if the user ID is invalid.
-     */
+
     @Transactional
     public void deleteUser(Long userId) {
         if (userId == null || userId <= 0) {

@@ -20,7 +20,7 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${web.allowed.origins}") // Load allowed origins from configuration
+    @Value("${web.allowed.origins}")
     private String allowedOrigins;
 
     @Bean
@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .cors().and()
                 .formLogin()
-                .defaultSuccessUrl("/scraper/start", true) // Redirect after login
+                .defaultSuccessUrl("/scraper/start", true)
                 .permitAll()
                 .and()
                 .logout()
@@ -43,8 +43,8 @@ public class SecurityConfig {
                 .permitAll()
                 .and()
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers("/css/**", "/js/**", "/images/**", "/scraper/start").permitAll(); // Public endpoints
-                    registry.anyRequest().authenticated(); // Require authentication for any other endpoints
+                    registry.requestMatchers("/css/**", "/js/**", "/images/**", "/scraper/start").permitAll();
+                    registry.anyRequest().authenticated();
                 });
 
         return http.build();
@@ -52,19 +52,19 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/css/**", "/js/**", "/images/**"); // Ignore static files
+        return (web) -> web.ignoring().requestMatchers("/css/**", "/js/**", "/images/**");
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:63342")); // Set allowed origins
-        configuration.setAllowedMethods(List.of("POST", "PUT", "DELETE", "OPTIONS", "GET")); // Include GET for APIs
-        configuration.setAllowedHeaders(List.of("*")); // Allow all headers
-        configuration.setAllowCredentials(true); // Allow cookies/auth headers
+        configuration.setAllowedOrigins(List.of("http://localhost:63342"));
+        configuration.setAllowedMethods(List.of("POST", "PUT", "DELETE", "OPTIONS", "GET"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Apply to all endpoints
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }

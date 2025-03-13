@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" >
+
 <head>
     <title>Scraping Results</title>
     <link rel="stylesheet" href="/css/style.css">
@@ -21,7 +22,7 @@
         const resultsContainer = document.getElementById("results-container");
 
         try {
-            const response = await fetch(`http://localhost:8080/scraper/results?taskId=${taskId}`);
+            const response = await fetch(`http://localhost:63342/scraper/results?taskId=${taskId}`);
 
             if (response.ok) {
                 const results = await response.json();

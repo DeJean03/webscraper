@@ -18,21 +18,9 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody User user) {
-        // Check for null fields or empty values
-        if (user.getUsername() == null || user.getUsername().isBlank() ||
-                user.getPassword() == null || user.getPassword().isBlank() ||
-                user.getEmail() == null || user.getEmail().isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid data. All fields are required.");
-        }
-
-        try {
-            // Register the new user
-            userService.registerUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully!");
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while registering the user.");
-        }
+    public String registerUser(@ModelAttribute User user){
+        userService.registerUser(user);
+        return "redirect:/login";
     }
 
 
