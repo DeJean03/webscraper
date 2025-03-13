@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Start Scraping</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div th:replace="fragments/nav :: nav"></div>
+<h1>Start Scraping</h1>
+<p>Enter the link you want to scrape:</p>
+
+<div class="container">
+    <form id="scraping-form" method="POST" action="/scraper/start">
+    <label for="url">URL to Scrape:</label>
+        <input type="url" id="url" name="url" placeholder="https://example.com" required><br>
+
+        <button type="submit">Start Scraping</button>
+    </form>
+    <div id="response-message" style="margin-top: 16px;"></div>
+</div>
+
+<nav>
+    <div class="dropdown">
+        <button class="dropbtn">Menu</button>
+        <div class="dropdown-content">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    document.getElementById("scraping-form").addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const url = document.getElementById("url").value;
+        const responseMessage = document.getElementById("response-message");
+
+        responseMessage.textContent = "";
+
+        try {
+            const response = await fetch("http://localhost:8080/scraper/start", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({ url })
+            });
+
+            if (response.ok) {
+                const taskId = await response.text();
+                responseMessage.style.color = "green";
+                responseMessage.textContent = `Scraping started successfully! Task ID: ${taskId}`;
+            } else {
+                const errorMessage = await response.text();
+                responseMessage.style.color = "red";
+                responseMessage.textContent = `Error: ${errorMessage}`;
+            }
+        } catch (error) {
+            responseMessage.style.color = "red";
+            responseMessage.textContent = `Unexpected Error: ${error.message}`;
+        }
+    });
+</script>
+</body>
+</html>

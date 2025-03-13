@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div th:replace="fragments/nav :: nav"></div>
+<div class="container">
+    <h2>Login</h2>
+    <form id="login-form">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" placeholder="Enter your username" required><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required><br>
+
+        <button type="submit">Login</button>
+    </form>
+    <div id="response-message" style="margin-top: 16px;"></div>
+</div>
+
+<nav>
+    <div class="dropdown">
+        <button class="dropbtn">Menu</button>
+        <div class="dropdown-content">
+            <a href="home.html">Home</a>
+            <a href="sign%20up.html">sign up</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+
+    document.getElementById("login-form").addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const username = document.getElementById("username").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const responseMessage = document.getElementById("response-message");
+
+        try {
+
+            const response = await fetch("http://localhost:8080/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username, email, password })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                responseMessage.style.color = "green";
+                responseMessage.textContent = `Login Successful! Welcome ${result.username}`;
+
+
+                window.location.href = "start-scraping.html";
+            } else {
+                const errorMessage = await response.text();
+                responseMessage.style.color = "red";
+                responseMessage.textContent = `Error: ${errorMessage}`;
+            }
+        } catch (error) {
+            responseMessage.style.color = "red";
+            responseMessage.textContent = `Unexpected Error: ${error.message}`;
+        }
+    });
+</script>
+</body>
+</html>

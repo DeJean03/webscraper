@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div th:replace="fragments/nav :: nav"></div>
+<h1>Welcome to Your Dashboard!</h1>
+<p>Use the menu below to navigate through the application:</p>
+
+<div class="actions">
+
+    <button onclick="window.location.href='home.html'">Home</button>
+</div>
+
+<nav>
+    <div class="dropdown">
+        <button class="dropbtn">Menu</button>
+        <div class="dropdown-content">
+            <a href="home.html">Home</a>
+            <a href="login.html">Login</a>
+        </div>
+    </div>
+</nav>
+
+</body>
+</html>

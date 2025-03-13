@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<nav>
+    <ul>
+        <li><a href="/" th:classappend="${#httpServletRequest.requestURI == '/' ? 'active' : ''}">Home</a></li>
+        <li><a href="/dashboard" th:classappend="${#httpServletRequest.requestURI.startsWith('/dashboard') ? 'active' : ''}">Dashboard</a></li>
+        <li><a href="/scraping-results" th:classappend="${#httpServletRequest.requestURI.startsWith('/scraping-results') ? 'active' : ''}">Scraping Results</a></li>
+        <li><a href="/user-management" th:classappend="${#httpServletRequest.requestURI.startsWith('/user-management') ? 'active' : ''}">User Management</a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+</nav>
+
+
+<script src="/js/script.js"></script>
+</body>
+</html>

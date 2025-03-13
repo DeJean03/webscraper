@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Scraping Results</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div th:replace="fragments/nav :: nav"></div>
+<div class="container">
+    <h2>Scraping Results</h2>
+    <div id="results-container" style="margin-top: 16px;">
+        <p>Loading results...</p>
+    </div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const taskId = urlParams.get("taskId");
+
+    async function fetchResults() {
+        const resultsContainer = document.getElementById("results-container");
+
+        try {
+            const response = await fetch(`http://localhost:8080/scraper/results?taskId=${taskId}`);
+
+            if (response.ok) {
+                const results = await response.json();
+
+                if (results.length > 0) {
+                    resultsContainer.innerHTML = results.map(result => `
+                            <div>
+                                <h3>${result.title}</h3>
+                                <a href="${result.link}" target="_blank">${result.link}</a>
+                            </div>
+                            <hr>
+                        `).join("");
+                } else {
+                    resultsContainer.innerHTML = "<p>No results found.</p>";
+                }
+            } else {
+                resultsContainer.innerHTML = `<p>Error fetching results: ${await response.text()}</p>`;
+            }
+        } catch (error) {
+            resultsContainer.innerHTML = `<p>Unexpected Error: ${error.message}</p>`;
+        }
+    }
+
+    fetchResults();
+</script>
+</body>
+</html>
